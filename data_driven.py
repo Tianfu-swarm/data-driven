@@ -129,6 +129,11 @@ def plot_group_sizes(group):
     plt.xlabel('Group Size', fontsize=12)
     plt.ylabel('Frequency', fontsize=12)
 
+    import os
+    save_dir = "/Users/tianfu/Desktop"
+    save_path = os.path.join(save_dir, f"1-frequency of group sizes.png")
+    plt.savefig(save_path, format='png', dpi=300)
+
     # 显示图表
     plt.xticks(list(size_counts.keys()))  # 设置x轴的刻度为组大小
     plt.show()
@@ -157,9 +162,17 @@ def plot_group_numbers_frequency_by_size(group):
             plt.xlabel('Number', fontsize=14)
             plt.ylabel('Frequency', fontsize=14)
 
+
+            import os
+            save_dir = "/Users/tianfu/Desktop"
+            save_path = os.path.join(save_dir, f"{group_size}-frequency of nums in subgroup of size {group_size}.png")
+            plt.savefig(save_path, format='png', dpi=300)
+
             # 显示图表
             plt.tight_layout()
             plt.show()
+
+
 
 def plot_group_size_frequency(group):
     # 统计每个分组的大小出现的频率
@@ -186,6 +199,11 @@ def plot_group_size_frequency(group):
     plt.title('Frequency of Number of Subgroup', fontsize=16)
     plt.xlabel('Number of Subgroup', fontsize=14)
     plt.ylabel('Frequency', fontsize=14)
+
+    import os
+    save_dir = "/Users/tianfu/Desktop"
+    save_path = os.path.join(save_dir, f"-frequency of num of subgroup.png")
+    plt.savefig(save_path, format='png', dpi=300)
 
     # 显示图表
     plt.tight_layout()
