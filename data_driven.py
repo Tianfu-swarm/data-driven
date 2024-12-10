@@ -212,6 +212,7 @@ def plot_group_size_frequency(group):
 def main():
     num_bats = 1000
     loop_num = 1000000
+
     group = test_loop(num_bats,loop_num)
 
     # 输出每次循环的 group 数据
