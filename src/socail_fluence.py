@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from collections import Counter
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
+import time
 
 # 定义函数：随机生成节点与节点的连接关系
 def generate_bat_choices(num_bats, probability):
@@ -83,9 +84,17 @@ def relation_numOfSubgroup_probabilities():
 
     plt.xlabel('Number of Subgroups', fontsize=12)
     plt.ylabel('Proportion', fontsize=12)
-    plt.title('Proportion of Different Number of Subgroups', fontsize=14)
+    plt.title(f'Proportion of Different Number of Subgroups (numOfBats = {num_bats})', fontsize=14)
     plt.legend()
     plt.grid(True)
+
+    # 生成随机文件名
+    timestamp = time.strftime("%Y%m%d_%H%M%S")  # 格式化当前时间：20240617_153045
+    random_filename = f"../picture/the relation of numSubGroup-probabilities_{timestamp}.png"
+
+    # 保存图片
+    plt.savefig(random_filename, dpi=300, bbox_inches='tight')
+
     plt.show()
 
 def relation_numOfSubgroup_numOfBats():
@@ -123,9 +132,17 @@ def relation_numOfSubgroup_numOfBats():
 
     plt.xlabel('Number of Subgroups', fontsize=12)
     plt.ylabel('Proportion', fontsize=12)
-    plt.title('Proportion of Different Number of Subgroups', fontsize=14)
+    plt.title(f'Proportion of Different Number of Subgroups (P = {probabilities})', fontsize=14)
     plt.legend()
     plt.grid(True)
+
+    # 生成随机文件名
+    timestamp = time.strftime("%Y%m%d_%H%M%S")  # 格式化当前时间：20240617_153045
+    random_filename = f"../picture/the relation of numSubGroup-numOfBats_{timestamp}.png"
+
+    # 保存图片
+    plt.savefig(random_filename, dpi=300, bbox_inches='tight')
+
     plt.show()
 
 def relation_numOfSubgroup_numOfBats_probabilities():
@@ -173,4 +190,8 @@ def relation_numOfSubgroup_numOfBats_probabilities():
     # 显示图形
     plt.show()
 
-relation_numOfSubgroup_numOfBats_probabilities()
+
+
+relation_numOfSubgroup_numOfBats()
+relation_numOfSubgroup_probabilities()
+# relation_numOfSubgroup_numOfBats_probabilities()
