@@ -90,7 +90,7 @@ def relation_numOfSubgroup_probabilities():
 
     # 生成随机文件名
     timestamp = time.strftime("%Y%m%d_%H%M%S")  # 格式化当前时间：20240617_153045
-    random_filename = f"../picture/the relation of numSubGroup-probabilities_{timestamp}.png"
+    random_filename = f"../picture/numOfBats: {num_bats}--the relation of numSubGroup-probabilities_{timestamp}.png"
 
     # 保存图片
     plt.savefig(random_filename, dpi=300, bbox_inches='tight')
@@ -100,8 +100,8 @@ def relation_numOfSubgroup_probabilities():
 def relation_numOfSubgroup_numOfBats():
 
     num_bats = np.arange(0, 110, 10)  # 节点数量
-    probabilities = 0.9  # 概率从0到1，每次增加0.1
-    simulations = 1000  # 仿真次数
+    probabilities = 1  # 概率从0到1，每次增加0.1
+    simulations = 100000  # 仿真次数
 
     # 用于存储不同概率下，各群体数量的比例
     groupnum_distribution = {num: [] for num in num_bats}
@@ -138,7 +138,7 @@ def relation_numOfSubgroup_numOfBats():
 
     # 生成随机文件名
     timestamp = time.strftime("%Y%m%d_%H%M%S")  # 格式化当前时间：20240617_153045
-    random_filename = f"../picture/the relation of numSubGroup-numOfBats_{timestamp}.png"
+    random_filename = f"../picture/P: {probabilities}--the relation of numSubGroup-numOfBats_{timestamp}.png"
 
     # 保存图片
     plt.savefig(random_filename, dpi=300, bbox_inches='tight')
@@ -193,5 +193,5 @@ def relation_numOfSubgroup_numOfBats_probabilities():
 
 
 relation_numOfSubgroup_numOfBats()
-relation_numOfSubgroup_probabilities()
+# relation_numOfSubgroup_probabilities()
 # relation_numOfSubgroup_numOfBats_probabilities()
