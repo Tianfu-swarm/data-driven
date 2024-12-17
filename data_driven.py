@@ -1,7 +1,5 @@
 import random
-import networkx as nx
 import matplotlib.pyplot as plt
-import numpy as np
 from collections import Counter
 import datetime
 
@@ -209,9 +207,10 @@ def plot_group_size_frequency(group):
     plt.tight_layout()
     plt.show()
 
+
 def main():
-    num_bats = 1000
-    loop_num = 1000000
+    num_bats = 16
+    loop_num = 100000
 
     group = test_loop(num_bats,loop_num)
 
