@@ -45,15 +45,18 @@ def draw_and_count_subgraphs(num_bats, probability):
 
     # 获取所有子图的节点数
     connected_components = list(nx.connected_components(G))
-    subgraph_sizes = [len(comp) for comp in connected_components]
+    # 过滤掉只包含一个节点的子图
+    filtered_components = [comp for comp in connected_components if len(comp) > 1]
+    # 获取每个子图的节点数
+    subgraph_sizes = [len(comp) for comp in filtered_components]
     # 返回子图数量和子图节点数
-    return len(connected_components), subgraph_sizes
+    return len(filtered_components), subgraph_sizes
 
-def relation_numOfSubgroup_probabilities():
+def relation_numOfSubgroup_probabilities(num_bats):
     # 参数设置
-    num_bats = 42  # 节点数量
+    num_bats = num_bats  # 节点数量
     probabilities = np.arange(0, 1.1, 0.1)  # 概率从0到1，每次增加0.1
-    simulations = 10000  # 仿真次数
+    simulations = 100000  # 仿真次数
 
     # 用于存储不同概率下，各群体数量的比例
     groupnum_distribution = {prob: [] for prob in probabilities}
@@ -90,22 +93,21 @@ def relation_numOfSubgroup_probabilities():
 
     # 生成随机文件名
     timestamp = time.strftime("%Y%m%d_%H%M%S")  # 格式化当前时间：20240617_153045
-    random_filename = f"../picture/numOfBats: {num_bats}--the relation of numSubGroup-probabilities_{timestamp}.png"
+    random_filename = f"../picture/numOfBats: {num_bats}-(no count size 1)-the relation of numSubGroup-probabilities_{timestamp}.png"
 
     # 保存图片
     plt.savefig(random_filename, dpi=300, bbox_inches='tight')
 
     plt.show()
 
-def relation_numOfSubgroup_numOfBats():
+def relation_numOfSubgroup_numOfBats(probabilities):
 
     num_bats = np.arange(0, 110, 10)  # 节点数量
-    probabilities = 1  # 概率从0到1，每次增加0.1
+    probabilities = probabilities
     simulations = 100000  # 仿真次数
 
     # 用于存储不同概率下，各群体数量的比例
     groupnum_distribution = {num: [] for num in num_bats}
-
 
     # 对于每个概率值执行10000次模拟
     for num in num_bats:
@@ -138,7 +140,7 @@ def relation_numOfSubgroup_numOfBats():
 
     # 生成随机文件名
     timestamp = time.strftime("%Y%m%d_%H%M%S")  # 格式化当前时间：20240617_153045
-    random_filename = f"../picture/P: {probabilities}--the relation of numSubGroup-numOfBats_{timestamp}.png"
+    random_filename = f"../picture/P: {probabilities}-(no count size 1)-（10-20）the relation of numSubGroup-numOfBats_{timestamp}.png"
 
     # 保存图片
     plt.savefig(random_filename, dpi=300, bbox_inches='tight')
@@ -192,6 +194,10 @@ def relation_numOfSubgroup_numOfBats_probabilities():
 
 
 
-relation_numOfSubgroup_numOfBats()
-# relation_numOfSubgroup_probabilities()
+# relation_numOfSubgroup_numOfBats(probabilities=0.5)
+
+relation_numOfSubgroup_probabilities(num_bats=100)
 # relation_numOfSubgroup_numOfBats_probabilities()
+
+# [group, subgraph_sizes] = draw_and_count_subgraphs(42, 0.1)
+# print(group, subgraph_sizes)
