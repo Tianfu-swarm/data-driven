@@ -50,7 +50,8 @@ def draw_and_count_subgraphs(num_bats, probability):
     # 获取每个子图的节点数
     subgraph_sizes = [len(comp) for comp in filtered_components]
     # 返回子图数量和子图节点数
-    return len(filtered_components), subgraph_sizes
+    # return len(filtered_components), subgraph_sizes
+    return len(connected_components), subgraph_sizes
 
 def relation_numOfSubgroup_probabilities(num_bats):
     # 参数设置
@@ -93,7 +94,7 @@ def relation_numOfSubgroup_probabilities(num_bats):
 
     # 生成随机文件名
     timestamp = time.strftime("%Y%m%d_%H%M%S")  # 格式化当前时间：20240617_153045
-    random_filename = f"../picture/numOfBats: {num_bats}-(no count size 1)-the relation of numSubGroup-probabilities_{timestamp}.png"
+    random_filename = f"../picture/numOfBats: {num_bats}--the relation of numSubGroup-probabilities_{timestamp}.png"
 
     # 保存图片
     plt.savefig(random_filename, dpi=300, bbox_inches='tight')
@@ -130,7 +131,7 @@ def relation_numOfSubgroup_numOfBats(probabilities):
         groupnums = sorted(distribution.keys())
         proportions = [distribution.get(g, 0) for g in groupnums]
 
-        plt.plot(groupnums, proportions, marker='o', label=f'P = {num:.1f}')
+        plt.plot(groupnums, proportions, marker='o', label=f'numOfBats = {num:.1f}')
 
     plt.xlabel('Number of Subgroups', fontsize=12)
     plt.ylabel('Proportion', fontsize=12)
@@ -140,7 +141,7 @@ def relation_numOfSubgroup_numOfBats(probabilities):
 
     # 生成随机文件名
     timestamp = time.strftime("%Y%m%d_%H%M%S")  # 格式化当前时间：20240617_153045
-    random_filename = f"../picture/P: {probabilities}-(no count size 1)-（10-20）the relation of numSubGroup-numOfBats_{timestamp}.png"
+    random_filename = f"../picture/P: {probabilities}--the relation of numSubGroup-numOfBats_{timestamp}.png"
 
     # 保存图片
     plt.savefig(random_filename, dpi=300, bbox_inches='tight')
@@ -193,10 +194,11 @@ def relation_numOfSubgroup_numOfBats_probabilities():
     plt.show()
 
 
+for prob in [i / 10 for i in range(1, 11)]:
+    relation_numOfSubgroup_numOfBats(probabilities=prob)
 
-# relation_numOfSubgroup_numOfBats(probabilities=0.5)
 
-relation_numOfSubgroup_probabilities(num_bats=100)
+# relation_numOfSubgroup_probabilities(num_bats=100)
 # relation_numOfSubgroup_numOfBats_probabilities()
 
 # [group, subgraph_sizes] = draw_and_count_subgraphs(42, 0.1)
