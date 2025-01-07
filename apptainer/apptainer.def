@@ -1,0 +1,31 @@
+Bootstrap: docker
+From: python:3.9-slim
+
+%post
+    # 更新包管理器并安装必要工具
+    apt-get update && apt-get install -y python3-pip python3-dev build-essential
+
+    # 安装 Python 依赖库
+    pip install --no-cache-dir matplotlib networkx numpy
+
+    # 创建工作目录
+    mkdir -p /app/src
+    mkdir -p /app/picture
+
+%files
+    # 将源代码文件复制到容器中
+    src/data_driven.py /app/src/data_driven.py
+    src/function.py /app/src/function.py
+    src/socail_influence.py /app/src/socail_influence.py
+
+    # 如果有图片目录，复制到容器
+    picture /app/picture
+
+%environment
+    # 设置环境变量
+    export PYTHONPATH=/app/src
+
+%runscript
+    # 默认执行脚本
+    echo "Running default script: data_driven.py"
+    python3 /app/src/data_driven.py
