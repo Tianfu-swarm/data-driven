@@ -10,6 +10,8 @@ import time
 def generate_bat_choices(num_bats, probability):
     bats = list(range(1, num_bats + 1))
     choices = {}
+    none_count = 0  # Initialize a counter for None values
+
     for bat in bats:
         if random.random() < probability:
             possible_choices = [i for i in bats if i != bat]
@@ -17,13 +19,16 @@ def generate_bat_choices(num_bats, probability):
             choices[bat] = chosen_one
         else:
             choices[bat] = None
-    return choices
+            none_count += 1  # Increment the counter when a None value is assigned
+
+    return choices, none_count
 
 # 定义函数：绘制图并返回每个子图的节点数量
 def draw_and_count_subgraphs(num_bats, probability):
 
     # 生成节点的连接关系
-    choices = generate_bat_choices(num_bats, probability)
+    choices,none_count = generate_bat_choices(num_bats, probability)
+
     #print(choices)
 
     # 创建无向图
@@ -49,9 +54,10 @@ def draw_and_count_subgraphs(num_bats, probability):
     filtered_components = [comp for comp in connected_components if len(comp) > 1]
     # 获取每个子图的节点数
     subgraph_sizes = [len(comp) for comp in filtered_components]
-    # 返回子图数量和子图节点数
+    # 返回子图数量和子图节点数（不统计大小1）
     # return len(filtered_components), subgraph_sizes
-    return len(connected_components), subgraph_sizes
+    # 返回子图数量和子图节点数（统计大小为1）
+    return len(connected_components), subgraph_sizes, none_count
 
 def relation_numOfSubgroup_probabilities(num_bats):
     # 参数设置
@@ -67,7 +73,7 @@ def relation_numOfSubgroup_probabilities(num_bats):
     for prob in probabilities:
         groupnum_simulations = []  # 用于存储该概率下的所有群体数量
         for _ in range(simulations):
-            groupnum, _ = draw_and_count_subgraphs(num_bats, prob)
+            groupnum, _, _ = draw_and_count_subgraphs(num_bats, prob)
             groupnum_simulations.append(groupnum)
 
         # 统计每个群体数量出现的频率
@@ -101,58 +107,72 @@ def relation_numOfSubgroup_probabilities(num_bats):
 
     plt.show()
 
+
 def relation_numOfSubgroup_numOfBats(probabilities):
-
-    num_bats = np.arange(0, 110, 10)  # 节点数量
+    num_bats = np.arange(50, 200, 50)  # Number of bats
     probabilities = probabilities
-    simulations = 100000  # 仿真次数
+    simulations = 10000000  # Number of simulations
 
-    # 用于存储不同概率下，各群体数量的比例
+    # Used to store the proportion of different group numbers for each number of bats
     groupnum_distribution = {num: [] for num in num_bats}
+    noneingroupnum_distribution = {num: [] for num in num_bats}  # To store none count distributions
 
-    # 对于每个概率值执行10000次模拟
+    # For each number of bats, run simulations
     for num in num_bats:
-        groupnum_simulations = []  # 用于存储该概率下的所有群体数量
+        groupnum_simulations = []  # Store all group numbers for this num of bats
+        noneingroupnum_simulations = []  # Store all none counts for this num of bats
         for _ in range(simulations):
-            groupnum, _ = draw_and_count_subgraphs(num, probabilities)
+            groupnum, _, none_count = draw_and_count_subgraphs(num, probabilities)
             groupnum_simulations.append(groupnum)
+            noneingroupnum_simulations.append(none_count)
 
-        # 统计每个群体数量出现的频率
-        unique, counts = np.unique(groupnum_simulations, return_counts=True)
-        distribution = dict(zip(unique, counts / simulations))  # 计算比例
-        groupnum_distribution[num] = distribution
+        # Calculate the distribution of group numbers (proportions)
+        unique_groupnums, groupnum_counts = np.unique(groupnum_simulations, return_counts=True)
+        groupnum_distribution[num] = dict(zip(unique_groupnums, groupnum_counts / simulations))  # Proportion of groupnums
 
-    # 绘制每个概率下群体数量的比例图
-    plt.figure(figsize=(10, 6))
+        # Calculate the distribution of none counts (proportions)
+        unique_noneingroupnums, noneingroupnum_counts = np.unique(noneingroupnum_simulations, return_counts=True)
+        noneingroupnum_distribution[num] = dict(zip(unique_noneingroupnums, noneingroupnum_counts / simulations))  # Proportion of none counts
 
+    # Plot both groupnum and noneingroupnum distributions
+    plt.figure(figsize=(12, 8))
+
+    # Plot groupnum distribution
     for num in num_bats:
-        # 提取该概率下每个群体数量及其比例
         distribution = groupnum_distribution[num]
         groupnums = sorted(distribution.keys())
         proportions = [distribution.get(g, 0) for g in groupnums]
+        plt.plot(groupnums, proportions, marker='o', label=f'numOfBats = {num:.1f} - Groupnums')
 
-        plt.plot(groupnums, proportions, marker='o', label=f'numOfBats = {num:.1f}')
+    # Plot noneingroupnum distribution
+    for num in num_bats:
+        distribution = noneingroupnum_distribution[num]
+        noneingroupnums = sorted(distribution.keys())
+        proportions = [distribution.get(n, 0) for n in noneingroupnums]
+        plt.plot(noneingroupnums, proportions, marker='x', label=f'numOfBats = {num:.1f} - non-followers')
 
-    plt.xlabel('Number of Subgroups', fontsize=12)
+    # Labels and title
+    plt.xlabel('Number of Subgroups / non-followers', fontsize=12)
     plt.ylabel('Proportion', fontsize=12)
-    plt.title(f'Proportion of Different Number of Subgroups (P = {probabilities})', fontsize=14)
+    plt.title(f'Proportion of Different Number of Subgroups and None Counts (P = {probabilities})', fontsize=14)
     plt.legend()
     plt.grid(True)
 
-    # 生成随机文件名
-    timestamp = time.strftime("%Y%m%d_%H%M%S")  # 格式化当前时间：20240617_153045
-    random_filename = f"../picture/P: {probabilities}--the relation of numSubGroup-numOfBats_{timestamp}.png"
+    # Generate a random filename
+    timestamp = time.strftime("%Y%m%d_%H%M%S")  # Current timestamp: 20240617_153045
+    random_filename = f"../picture/P_{probabilities}_relation_numSubGroup_numOfBats_{timestamp}.png"
 
-    # 保存图片
+    # Save the plot
     plt.savefig(random_filename, dpi=300, bbox_inches='tight')
 
+    # Display the plot
     plt.show()
 
 def relation_numOfSubgroup_numOfBats_probabilities():
     # 参数设置
     probabilities = np.arange(0, 1.01, 0.01)  # 概率从0到1，每次增加0.1
     num_bats_values = np.arange(2, 101, 1)  # 节点数量从2到100，每次增加1
-    simulations = 1000  # 仿真次数
+    simulations = 100000  # 仿真次数
 
     # 存储子群体数量为2的比例
     subgroup_2_proportions = np.zeros((len(probabilities), len(num_bats_values)))
@@ -162,7 +182,7 @@ def relation_numOfSubgroup_numOfBats_probabilities():
         for j, num_bats in enumerate(num_bats_values):
             groupnum_simulations = []  # 存储当前组合下的所有群体数量
             for _ in range(simulations):
-                groupnum, _ = draw_and_count_subgraphs(num_bats, prob)
+                groupnum, _, _ = draw_and_count_subgraphs(num_bats, prob)
                 groupnum_simulations.append(groupnum)
 
             # 统计子群体数量为2的比例
@@ -201,5 +221,5 @@ for prob in [i / 10 for i in range(1, 11)]:
 # relation_numOfSubgroup_probabilities(num_bats=100)
 # relation_numOfSubgroup_numOfBats_probabilities()
 
-# [group, subgraph_sizes] = draw_and_count_subgraphs(42, 0.1)
-# print(group, subgraph_sizes)
+# group, subgraph_sizes, none_count = draw_and_count_subgraphs(42, 0.1)
+# print(group, subgraph_sizes, none_count)
