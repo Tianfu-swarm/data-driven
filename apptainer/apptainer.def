@@ -12,11 +12,11 @@ From: python:3.9-slim
     mkdir -p /app/src
     mkdir -p /app/picture
 
-%files
+# %files
     # 将源代码文件复制到容器中
-    src/data_driven.py /app/src/data_driven.py
-    src/function.py /app/src/function.py
-    src/socail_influence.py /app/src/socail_influence.py
+    # src/data_driven.py /app/src/data_driven.py
+    # src/function.py /app/src/function.py
+    # src/socail_influence.py /app/src/socail_influence.py
 
     # 如果有图片目录，复制到容器
     picture /app/picture

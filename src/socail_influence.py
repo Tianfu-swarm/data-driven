@@ -2,6 +2,7 @@ import random
 import networkx as nx
 import matplotlib.pyplot as plt
 from collections import Counter
+from scipy.stats import binom
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 import time
@@ -109,9 +110,9 @@ def relation_numOfSubgroup_probabilities(num_bats):
 
 
 def relation_numOfSubgroup_numOfBats(probabilities):
-    num_bats = np.arange(50, 200, 50)  # Number of bats
+    num_bats = np.arange(100, 400, 100)  # Number of bats
     probabilities = probabilities
-    simulations = 10000000  # Number of simulations
+    simulations = 100000  # Number of simulations
 
     # Used to store the proportion of different group numbers for each number of bats
     groupnum_distribution = {num: [] for num in num_bats}
@@ -151,16 +152,25 @@ def relation_numOfSubgroup_numOfBats(probabilities):
         proportions = [distribution.get(n, 0) for n in noneingroupnums]
         plt.plot(noneingroupnums, proportions, marker='x', label=f'numOfBats = {num:.1f} - non-followers')
 
+    #Binomial distribution
+    for num in num_bats:
+        p = 1 - probabilities
+        n = num
+        x = np.arange(0, n + 1)
+        pmf = binom.pmf(x, n, p)
+        plt.plot(x, pmf, marker='*', alpha=0.5, label=f'numOfBats = {num:.1f} - PMF')
+
+
     # Labels and title
     plt.xlabel('Number of Subgroups / non-followers', fontsize=12)
     plt.ylabel('Proportion', fontsize=12)
-    plt.title(f'Proportion of Different Number of Subgroups and None Counts (P = {probabilities})', fontsize=14)
+    plt.title(f'Proportion of Different Number of Subgroups and non-followers (P = {probabilities})', fontsize=14)
     plt.legend()
     plt.grid(True)
 
     # Generate a random filename
     timestamp = time.strftime("%Y%m%d_%H%M%S")  # Current timestamp: 20240617_153045
-    random_filename = f"../picture/P_{probabilities}_relation_numSubGroup_numOfBats_{timestamp}.png"
+    random_filename = f"../picture/P_{probabilities}_PMF_{timestamp}.png"
 
     # Save the plot
     plt.savefig(random_filename, dpi=300, bbox_inches='tight')
