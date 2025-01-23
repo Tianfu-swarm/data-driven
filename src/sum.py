@@ -9,7 +9,7 @@ def S(n):
     return result
 
 # 测试代码
-n = 10  # 你可以更改n的值来计算不同的结果
+n = 10  #节点数量
 result = S(n)
 print(result)
 
