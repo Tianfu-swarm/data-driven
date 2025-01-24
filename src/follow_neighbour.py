@@ -27,7 +27,7 @@ def generate_bat_positions(rows=10, cols=10):
 
 def generate_follow_target(bats, range_r=1.0):
     bat_follow_target = {}
-
+    bat_neighbors_count = {}
     # 将蝙蝠坐标映射到编号的字典
     position_map = {tuple(pos): bat_id for bat_id, pos in bats}
 
@@ -47,13 +47,16 @@ def generate_follow_target(bats, range_r=1.0):
             if distance <= range_r:
                 neighbors.append(neighbor_id)
 
+        num_neighbors = len(neighbors)
+        bat_neighbors_count[bat_id] = num_neighbors
+
         # 如果有邻居，随机选择一个跟随
         if neighbors:
             bat_follow_target[bat_id] = random.choice(neighbors)
         else:
             bat_follow_target[bat_id] = None  # 如果没有邻居，则不跟随
 
-    return bat_follow_target
+    return bat_follow_target, bat_neighbors_count
 
 
 def calculate_subgroup_positions_size(bat_follow_target, bats):
@@ -271,103 +274,164 @@ def plot_group_nums(cumulative_group_nums,range_r):
     plt.grid(True)
     plt.show()
 
-# 初始化累积坐标
-cumulative_x = []
-cumulative_y = []
-cumulative_group = []
-cumulative_group_nums = []
-
-
-# range_r = 1.415
-# # 动态绘制热力图F
-# for frame in range(100000):
-#     # bats = generate_bat_positions(10,10)
-#     bats = generate_bat_positions_point_processed_uniform(100, (0, 10), (0, 10))
-#     bat_follow_target = generate_follow_target(bats,range_r)
-#     group_size_position = calculate_subgroup_positions_size(bat_follow_target, bats)
-#     # plot_bat_follow_graph(bats, bat_follow_target)
-#     # plot_group_position(group_size_position)
-#     ## 提取子组位置
-#     group_positions = []
-#     for group_id, (size, group_pos) in group_size_position.items():
-#         group_positions.append(group_pos)  # 提取位置 (x, y)
-#
-#     # 转换为 NumPy 数组
-#     new_x = [pos[0] for pos in group_positions]  # 提取所有 x 坐标
-#     new_y = [pos[1] for pos in group_positions]  # 提取所有 y 坐标
-#
-#     # 将新位置加入累积数组
-#     cumulative_x.extend(new_x)
-#     cumulative_y.extend(new_y)
-#
-#     ##提取累计size与position
-#     for size, group_pos in group_size_position.values():
-#         cumulative_group.append((size, group_pos))
-#
-#     ##统计group_nums
-#     num_groups = len(group_size_position)
-#     cumulative_group_nums.append(num_groups)
-#
-# #
-# plot_heatmap_position(cumulative_x, cumulative_y,range_r)
-# plot_heatmap_size_position(cumulative_group,range_r)
-# plot_group_nums(cumulative_group_nums,range_r)
-
-
-
-# 创建一个字典来存储每个range_r的group数量
-all_group_nums = {}
-range_values = [1, np.sqrt(2), 2, np.sqrt(5), np.sqrt(8), 3,
-                np.sqrt(10), np.sqrt(13), 4, np.sqrt(17), np.sqrt(18), np.sqrt(20), 5, np.sqrt(26),
-                np.sqrt(30), np.sqrt(34), 6, np.sqrt(37), np.sqrt(40), np.sqrt(45), 7, np.sqrt(50)]
-
-# range_values = [1.415]
-# 遍历range_r从1到10
-for range_r in range_values:
+def plot_heatmap():
+    # 初始化累积坐标
+    cumulative_x = []
+    cumulative_y = []
+    cumulative_group = []
     cumulative_group_nums = []
+    cumulative_group_sizes = []
 
-    # 模拟 100000 个周期
-    for frame in range(100000):
-        # bats = generate_bat_positions(rows, cols)
+    range_r = 1
+    # 动态绘制热力图F
+    for frame in range(1):
+        # bats = generate_bat_positions(10,10)
         bats = generate_bat_positions_point_processed_uniform(100, (0, 10), (0, 10))
-        bat_follow_target = generate_follow_target(bats, range_r)
+        bat_follow_target, _ = generate_follow_target(bats,range_r)
         group_size_position = calculate_subgroup_positions_size(bat_follow_target, bats)
+        plot_bat_follow_graph(bats, bat_follow_target)
+        # plot_group_position(group_size_position)
+        ## 提取子组位置
+        group_positions = []
+        for group_id, (size, group_pos) in group_size_position.items():
+            group_positions.append(group_pos)  # 提取位置 (x, y)
 
-        # 统计每一帧的group数量
+        # 转换为 NumPy 数组
+        new_x = [pos[0] for pos in group_positions]  # 提取所有 x 坐标
+        new_y = [pos[1] for pos in group_positions]  # 提取所有 y 坐标
+
+        # 将新位置加入累积数组
+        cumulative_x.extend(new_x)
+        cumulative_y.extend(new_y)
+
+        ##提取累计size与position
+        for size, group_pos in group_size_position.values():
+            cumulative_group.append((size, group_pos))
+
+        ##统计group_nums
         num_groups = len(group_size_position)
         cumulative_group_nums.append(num_groups)
 
-    # 将该range_r对应的group数量保存到字典
-    all_group_nums[range_r] = cumulative_group_nums
 
-# 绘制所有range_r对应的折线图
-plt.figure(figsize=(20, 8))
+    plot_heatmap_position(cumulative_x, cumulative_y,range_r)
+    plot_heatmap_size_position(cumulative_group,range_r)
+    plot_group_nums(cumulative_group_nums,range_r)
 
-for range_r, cumulative_group_nums in all_group_nums.items():
-    size_counts = Counter(cumulative_group_nums)
-    print(size_counts)
-    # 获取 size 和对应的出现次数
-    x = list(size_counts.keys())
-    y = list(size_counts.values())
 
-    # 按照组大小 (x) 从小到大排序
-    sorted_indices = sorted(range(len(x)), key=lambda i: x[i])  # 获取按 x 排序的索引
-    x_sorted = [x[i] for i in sorted_indices]  # 按照排序的索引重新排序 x
-    y_sorted = [y[i] for i in sorted_indices]
+def plot_for_all():
 
-    plt.plot(x_sorted, y_sorted, label=f"Range r = {range_r:.2f}", marker='o', linestyle='-')
+    # 创建一个字典来存储每个range_r的group数量
+    all_group_nums = {}
+    range_values = [1, np.sqrt(2), 2, np.sqrt(5), np.sqrt(8), 3,
+                    np.sqrt(10), np.sqrt(13), 4, np.sqrt(17), np.sqrt(18), np.sqrt(20), 5, np.sqrt(26),
+                    np.sqrt(30), np.sqrt(34), 6, np.sqrt(37), np.sqrt(40), np.sqrt(45), 7, np.sqrt(50)]
 
-# 设置标题和标签
-plt.title("Number of Subgroups for Different Range r Values")
-plt.xlabel("Number of Groups")
-plt.ylabel("frequency")
+    # range_values = [1.415]
+    # 遍历range_r从1到10
+    for range_r in range_values:
+        cumulative_group_nums = []
 
-# 显示图例
-plt.legend()
+        # 模拟 100000 个周期
+        for frame in range(10000):
+            # bats = generate_bat_positions(rows, cols)
+            bats = generate_bat_positions_point_processed_uniform(100, (0, 10), (0, 10))
+            bat_follow_target, _ = generate_follow_target(bats, range_r)
+            group_size_position = calculate_subgroup_positions_size(bat_follow_target, bats)
 
-# 设置横轴刻度，每隔 1 显示一个标签
-plt.xticks(np.arange(0, 25, 1))
+            # 统计每一帧的group数量
+            num_groups = len(group_size_position)
+            cumulative_group_nums.append(num_groups)
 
-# 显示网格
-plt.grid(True)
-plt.show()
+        # 将该range_r对应的group数量保存到字典
+        all_group_nums[range_r] = cumulative_group_nums
+
+    # 绘制所有range_r对应的折线图
+    plt.figure(figsize=(20, 8))
+
+    for range_r, cumulative_group_nums in all_group_nums.items():
+        size_counts = Counter(cumulative_group_nums)
+        # print(size_counts)
+        # 获取 size 和对应的出现次数
+        x = list(size_counts.keys())
+        y = list(size_counts.values())
+
+        # 按照组大小 (x) 从小到大排序
+        sorted_indices = sorted(range(len(x)), key=lambda i: x[i])  # 获取按 x 排序的索引
+        x_sorted = [x[i] for i in sorted_indices]  # 按照排序的索引重新排序 x
+        y_sorted = [y[i] for i in sorted_indices]
+
+        print(f"range_r = {range_r}", x_sorted, y_sorted)
+        plt.plot(x_sorted, y_sorted, label=f"Range r = {range_r:.2f}", marker='o', linestyle='-')
+
+    # 设置标题和标签
+    plt.title("Number of Subgroups for Different Range r Values")
+    plt.xlabel("Number of Groups")
+    plt.ylabel("frequency")
+
+    # 显示图例
+    plt.legend()
+
+    # 设置横轴刻度，每隔 1 显示一个标签
+    plt.xticks(np.arange(0, 40, 1))
+    # 显示网格
+    plt.grid(True)
+    plt.show()
+
+def count_neighbor_num():
+    range_neighbors_distribution = {}
+
+    # 生成 range_r 值，从 0 到 sqrt(200)，步长为 0.5
+    range_values = np.arange(1, 10, 1)  # 从 0.5 开始，以避免 r = 0
+
+    # 假设进行 10000 个 frame 计算
+    for range_r in range_values:
+        all_neighbors = []  # 用于存储所有蝙蝠的邻居数量
+
+        for frame in range(1000):
+            bats = generate_bat_positions_point_processed_uniform(100, (0, 10), (0, 10))  # 生成蝙蝠位置
+            _, bat_neighbors_count = generate_follow_target(bats, range_r)  # 获取邻居个数
+
+            # 将每个蝙蝠的邻居个数记录下来
+            all_neighbors.extend(bat_neighbors_count.values())  # 使用 extend 将所有邻居个数合并到一个列表中
+
+        # 使用 Counter 计算邻居数量的频率分布
+        neighbor_counts = Counter(all_neighbors)
+
+        # 将结果存储到字典中，按 range_r 分类
+        range_neighbors_distribution[range_r] = neighbor_counts
+
+    # 创建图形
+    plt.figure(figsize=(15, 10))
+
+    # 绘制每个 range_r 对应的邻居数量频率分布
+    for range_r, neighbor_counts in range_neighbors_distribution.items():
+        # 排序邻居数量并绘制频率分布
+        sorted_neighbors = sorted(neighbor_counts.items())  # 按邻居数量排序
+        x_vals, y_vals = zip(*sorted_neighbors)  # 解压排序后的数据为 x 和 y 值
+
+        # 绘制折线图
+        plt.plot(x_vals, y_vals, label=f'r = {range_r:.2f}', marker='o', linestyle='-')
+
+    # 设置图形标签
+    plt.title('Neighbor Count Frequency Distribution for Different r Values')
+    plt.xlabel('Neighbor Count')
+    plt.ylabel('Frequency (Count)')
+
+    # 设置横轴每5个单位显示一个刻度
+    plt.xticks(np.arange(0, max(x_vals) + 1, 5))
+
+    # 启用网格线
+    plt.grid(True)
+
+    # 设置图例自动调整位置
+    plt.legend(loc='best')
+
+    # 显示图形
+    plt.show()
+
+
+
+
+count_neighbor_num()
+# plot_heatmap()
+# plot_for_all()
