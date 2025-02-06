@@ -20,7 +20,7 @@ def plot_binomial_pmf_line(n, p):
 
     # 绘制折线图
     plt.figure(figsize=(10, 6))
-    plt.plot(x, pmf, marker='o', color='blue', label="PMF", linewidth=2, markersize=8)
+    plt.plot(x, pmf, marker='o', color='blue', label="binomial_distribution", linewidth=2, markersize=8)
 
     # 设置图表标题和标签
     plt.title(f"Binomial Distribution (n={n}, p={1-p})", fontsize=16)
@@ -34,7 +34,7 @@ def plot_binomial_pmf_line(n, p):
     plt.show()
 
 
-# 示例用法
+
 n = 100  # 试验次数
 p = 0.1  # 单次成功的概率
 

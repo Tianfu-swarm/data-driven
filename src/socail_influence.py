@@ -145,32 +145,34 @@ def relation_numOfSubgroup_numOfBats(probabilities):
         proportions = [distribution.get(g, 0) for g in groupnums]
         plt.plot(groupnums, proportions, marker='o', label=f'numOfBats = {num:.1f} - Groupnums')
 
-    # Plot noneingroupnum distribution
+    # Plot non-followers distribution
     for num in num_bats:
         distribution = noneingroupnum_distribution[num]
         noneingroupnums = sorted(distribution.keys())
         proportions = [distribution.get(n, 0) for n in noneingroupnums]
         plt.plot(noneingroupnums, proportions, marker='x', label=f'numOfBats = {num:.1f} - non-followers')
 
-    #Binomial distribution
+    #Plot Binomial distribution
     for num in num_bats:
         p = 1 - probabilities
         n = num
         x = np.arange(0, n + 1)
         pmf = binom.pmf(x, n, p)
-        plt.plot(x, pmf, marker='*', alpha=0.5, label=f'numOfBats = {num:.1f} - PMF')
+        plt.plot(x, pmf, marker='*', alpha=0.5, label=f'numOfBats = {num:.1f} - binomial_distribution')
 
 
-    # Labels and title
+    # Labels and titleFp
     plt.xlabel('Number of Subgroups / non-followers', fontsize=12)
     plt.ylabel('Proportion', fontsize=12)
+    plt.xlim(0, max(groupnums) + 15)
+    plt.xticks(np.arange(0, max(groupnums) + 5, 20))
     plt.title(f'Proportion of Different Number of Subgroups and non-followers (P = {probabilities})', fontsize=14)
     plt.legend()
     plt.grid(True)
 
     # Generate a random filename
     timestamp = time.strftime("%Y%m%d_%H%M%S")  # Current timestamp: 20240617_153045
-    random_filename = f"../picture/P_{probabilities}_PMF_{timestamp}.png"
+    random_filename = f"../picture/P_{probabilities}_binomial_distribution_{timestamp}.png"
 
     # Save the plot
     plt.savefig(random_filename, dpi=300, bbox_inches='tight')
@@ -224,7 +226,7 @@ def relation_numOfSubgroup_numOfBats_probabilities():
     plt.show()
 
 
-for prob in [i / 10 for i in range(1, 11)]:
+for prob in [i / 10 for i in range(9, 11)]:
     relation_numOfSubgroup_numOfBats(probabilities=prob)
 
 
