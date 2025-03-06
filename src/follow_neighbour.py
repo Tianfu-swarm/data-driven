@@ -4,9 +4,9 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
 from collections import Counter
+import pandas as pd
 
-
-def generate_bat_positions_point_processed_uniform(num_bats=100, x_range=(0, 1), y_range=(0, 1)):
+def generate_bat_positions_point_processed_uniform(num_bats=100, x_range=(0, 10), y_range=(0, 10)):
     # 生成均匀分布的坐标
     x_coords = np.random.uniform(x_range[0], x_range[1], num_bats)
     y_coords = np.random.uniform(y_range[0], y_range[1], num_bats)
@@ -25,7 +25,7 @@ def generate_bat_positions(rows=10, cols=10):
 
     return bats
 
-def generate_follow_target(bats, range_r=1.0, follow_prob=1.0):
+def generate_follow_target(bats, range_r, follow_prob):
 
     bat_follow_target = {}
     bat_neighbors_count = {}
@@ -434,7 +434,7 @@ def groupnum_of_different_density():
     plt.show()
 
 def groupnum_of_different_neighbors():
-    posibility = 0.9;
+    posibility = 1
     # 你想要测试的一对参数 (range_r, area_size)
     pairs = [
         (2,10),
@@ -853,9 +853,9 @@ def count_neighbor_num_bats():
     # 显示图形
     plt.show()
 
-def count_subgroup_size_distribution():
-    range_values = np.arange(20, 21, 1)  # 半径范围 1 到 10
-    posibility = 0.5
+def count_subgroup_size_distribution_range():
+    range_values = np.arange(3, 4, 1)  # 半径范围 1 到 10
+    posibility = 1
     subgroup_size_dict = {}  # 存储不同半径的子群大小
 
     for range_r in range_values:
@@ -887,7 +887,7 @@ def count_subgroup_size_distribution():
     plt.ylabel('Frequency')
     plt.title(f'Subgroup Size Frequency Distribution for Different Ranges (P={posibility})')
     # 设置横轴每5个单位显示一个刻度
-    plt.xticks(np.arange(0, max(x_size) + 5, 5))  #
+    plt.xticks(np.arange(0, 101, 5))  #
 
     # 启用网格线
     plt.grid(True)
@@ -896,6 +896,92 @@ def count_subgroup_size_distribution():
     plt.legend(loc='best')
 
     # 显示图形
+    plt.show()
+
+def count_subgroup_size_distribution_density():
+    # area_size = np.arange(1, 11, 1)  # 半径范围 1 到 10
+    area_size = {1,5,10}
+    posibility = 1
+    range_r = 1
+    subgroup_size_dict = {}  # 存储不同半径的子群大小
+
+    for area_s in area_size:
+        all_subgroup_sizes = []  # 单独存储当前半径的子群大小
+
+        for frame in range(10000):  # 每个半径计算10次
+            # 生成 100 只蝙蝠的随机位置
+            bats = generate_bat_positions_point_processed_uniform(100, (0, area_s), (0, area_s))
+            bat_follow_target, _ = generate_follow_target(bats, range_r, posibility)
+            group_size_position = calculate_subgroup_positions_size(bat_follow_target, bats)
+
+            # 提取所有群组大小
+            subgroup_sizes = [size for size, _ in group_size_position.values()]
+            all_subgroup_sizes.extend(subgroup_sizes)
+
+        # 统计 group size 出现的次数
+        subgroup_size_dict[area_s] = Counter(all_subgroup_sizes)
+
+    # 绘制折线图
+    plt.figure(figsize=(12, 8))
+
+    for area_s, size_counts in subgroup_size_dict.items():
+        sorted_sizes = sorted(size_counts.items())  # 排序群组大小
+        x_size, y_frequency = zip(*sorted_sizes)  # 获取每个大小的出现次数
+
+        plt.plot(x_size, y_frequency, label=f'area = {area_s}*{area_s}', marker='o', linestyle='-')
+
+    plt.xlabel('Subgroup Size')
+    plt.ylabel('Frequency')
+    plt.title(f'Subgroup Size Frequency Distribution for Different density (range={range_r})')
+    # 设置横轴每5个单位显示一个刻度
+    plt.xticks(np.arange(0, 101, 5))  #
+    plt.grid(True)
+    plt.legend(loc='best')
+    plt.show()
+
+def count_subgroup_size_distribution_pairs():
+    pairs = [
+        (2, 4),
+        (3, 6),
+        (4, 8),
+        (5, 10)
+    ]
+
+    posibility = 1
+    subgroup_size_dict = {}  # 存储不同半径的子群大小
+
+    for [range_r,area_s] in pairs:
+        all_subgroup_sizes = []  # 单独存储当前半径的子群大小
+
+        for frame in range(10000):  # 每个半径计算10次
+            # 生成 100 只蝙蝠的随机位置
+            bats = generate_bat_positions_point_processed_uniform(100, (0, area_s), (0, area_s))
+            bat_follow_target, _ = generate_follow_target(bats, range_r, posibility)
+            group_size_position = calculate_subgroup_positions_size(bat_follow_target, bats)
+
+            # 提取所有群组大小
+            subgroup_sizes = [size for size, _ in group_size_position.values()]
+            all_subgroup_sizes.extend(subgroup_sizes)
+
+        # 统计 group size 出现的次数
+        subgroup_size_dict[(range_r, area_s)] = Counter(all_subgroup_sizes)
+
+    # 绘制折线图
+    plt.figure(figsize=(12, 8))
+
+    for (range_r, area_s), size_counts in subgroup_size_dict.items():
+        sorted_sizes = sorted(size_counts.items())  # 排序群组大小
+        x_size, y_frequency = zip(*sorted_sizes)  # 获取每个大小的出现次数
+
+        plt.plot(x_size, y_frequency, label=f'range_r = {range_r},area = {area_s}*{area_s}', marker='o', linestyle='-')
+
+    plt.xlabel('Subgroup Size')
+    plt.ylabel('Frequency')
+    plt.title(f'Subgroup Size Frequency Distribution for Different pairs)')
+    # 设置横轴每5个单位显示一个刻度
+    plt.xticks(np.arange(0, 101, 5))  #
+    plt.grid(True)
+    plt.legend(loc='best')
     plt.show()
 
 def count_subgroup_size_distribution_posibility():
@@ -932,7 +1018,7 @@ def count_subgroup_size_distribution_posibility():
     plt.ylabel('Frequency')
     plt.title(f'Subgroup Size Frequency Distribution for Different P')
     # 设置横轴每5个单位显示一个刻度
-    plt.xticks(np.arange(0, max(x_size) + 5, 5))  #
+    plt.xticks(np.arange(0, 101, 5))  #
 
     # 启用网格线
     plt.grid(True)
@@ -942,7 +1028,6 @@ def count_subgroup_size_distribution_posibility():
 
     # 显示图形
     plt.show()
-
 
 def count_subgroup_size_distribution_fixed_range():
     # 固定的半径值（可根据需要修改）
@@ -1007,10 +1092,167 @@ def count_subgroup_size_distribution_fixed_range():
 
     plt.show()
 
+def count_group_size_posibility_range():
+    range_r = np.arange(5,10,1)  # 固定不同区域大小
+    probabilities = np.arange(0.6, 1.099, 0.1)  # p 从 0 到 1，每隔 0.1 取一个值
+
+    mode_values = []
+    mean_values = []  # 存储 (r, p, mean)
+    var_values = []  # 存储 (r, p, variance)
+
+    loop_all = range_r.size * probabilities.size
+    loop_num = 0
+
+    for r in range_r:
+        for p in probabilities:
+            loop_num += 1
+            print(f"loading...{loop_num}/{loop_all}")
+            all_subgroup_sizes = []  # 用于存储所有组合下的子群大小
+            for frame in range(10000):  # 每个组合模拟 10000 次
+                # 生成 100 只蝙蝠的随机位置
+                bats = generate_bat_positions_point_processed_uniform(100, (0, 10), (0, 10))
+                bat_follow_target, _ = generate_follow_target(bats, r, p)
+                group_size_position = calculate_subgroup_positions_size(bat_follow_target, bats)
+
+                # 提取所有群组大小
+                subgroup_sizes = [size for size, _ in group_size_position.values()]
+                all_subgroup_sizes.extend(subgroup_sizes)
+
+            # 计算众数
+            size_counter = Counter(all_subgroup_sizes)
+            most_common_size, frequency = size_counter.most_common(1)[0]
+            print(most_common_size, frequency, r, p)
+            # 计算均值和方差
+            mean_size = np.mean(all_subgroup_sizes)
+            var_size = np.var(all_subgroup_sizes)
+
+            # 记录结果
+            mode_values.append((r, p, most_common_size))
+            mean_values.append((r, p, mean_size))
+            var_values.append((r, p, var_size))
+
+    # 转换为数组以便绘图
+    mode_values = np.array(mode_values)
+    mean_values = np.array(mean_values)
+    var_values = np.array(var_values)
+
+    # 设置柱状图的宽度
+    bar_width = 0.05
+    bar_depth = 0.03
+
+    # 绘制均值的三维柱状图
+    fig = plt.figure(figsize=(20, 6))
+    ax1 = fig.add_subplot(131, projection='3d')
+
+    for x, y, z in mean_values:
+        ax1.bar3d(x, y, 0, bar_width, bar_depth, z, shade=True, color='green')
+
+    ax1.set_xlabel('Range (r)')
+    ax1.set_ylabel('Probability (p)')
+    ax1.set_zlabel('Mean Subgroup Size')
+    ax1.set_title('Mean Subgroup Size Distribution')
+    ax1.set_xlim(range_r[0], range_r[-1])
+    ax1.set_ylim(probabilities[-1], probabilities[0])
+    ax1.set_zlim(0, np.max(mean_values[:, 2]))
+    ax1.view_init(elev=30, azim=135)
+
+    # 绘制方差的三维柱状图
+    ax2 = fig.add_subplot(132, projection='3d')
+
+    for x, y, z in var_values:
+        ax2.bar3d(x, y, 0, bar_width, bar_depth, z, shade=True, color='orange')
+
+    ax2.set_xlabel('Range (r)')
+    ax2.set_ylabel('Probability (p)')
+    ax2.set_zlabel('Variance of Subgroup Size')
+    ax2.set_title('Variance of Subgroup Size Distribution')
+    ax2.set_xlim(range_r[0], range_r[-1])
+    ax2.set_ylim(probabilities[-1], probabilities[0])
+    ax2.set_zlim(0, np.max(var_values[:, 2]))
+    ax2.view_init(elev=30, azim=135)
+
+    #mode
+    ax3 = fig.add_subplot(133, projection='3d')
+
+    for x, y, z in mode_values:
+        ax3.bar3d(x, y, 0, bar_width, bar_depth, z, shade=True, color='orange')
+
+    ax3.set_xlabel('Range (r)')
+    ax3.set_ylabel('Probability (p)')
+    ax3.set_zlabel('Mode of Subgroup Size')
+    ax3.set_title('Mode of Subgroup Size Distribution')
+    ax3.set_xlim(range_r[0], range_r[-1])
+    ax3.set_ylim(probabilities[-1], probabilities[0])
+    ax3.set_zlim(0, np.max(mode_values[:, 2]))
+    ax3.view_init(elev=30, azim=135)
+
+
+    plt.tight_layout()
+    plt.show()
+
+def fit_factors_group_with_loop():
+    posibility = 1  # 跟随概率
+
+    # 随机生成参数对 (range_r, area_size, n)
+    # 例如：随机生成 5 组参数
+    pairs = [
+        (random.randint(1, 15), random.randint(1, 10), random.randint(10, 100))
+        for _ in range(10000)
+    ]
+
+    # 创建一个字典来存储每个 (range_r, area_s, n) 的 group 数量分布
+    all_group_nums = {}
+
+    # 遍历每个参数对
+    for (range_r, area_s, n) in pairs:
+        cumulative_group_nums = []
+
+        # 模拟 100000 个周期
+
+            # 根据 area_s 设置 x, y 范围
+        bats = generate_bat_positions_point_processed_uniform(
+                n,  # 随机生成的目标数
+                (0, area_s),  # x 范围
+                (0, area_s)  # y 范围
+            )
+        bat_follow_target, _ = generate_follow_target(bats, range_r, posibility)
+        group_size_position = calculate_subgroup_positions_size(bat_follow_target, bats)
+
+            # 统计每一帧的 group 数量
+        num_groups = len(group_size_position)
+        cumulative_group_nums.append(num_groups)
+
+        # 将该 (range_r, area_s, n) 对应的 group 数量分布保存到字典
+        all_group_nums[(range_r, area_s, n)] = cumulative_group_nums
+
+    # 将结果保存到 Excel 文件
+    save_to_excel(all_group_nums)
+
+def save_to_excel(all_group_nums):
+    # 创建一个 DataFrame 来存储结果
+    df = pd.DataFrame()
+
+    # 将字典中的数据转换为 DataFrame
+    for (range_r, area_s, n), group_nums in all_group_nums.items():
+        # 列名为 (r, A, n)
+        column_name = f"r={range_r}, A={area_s}, n={n}"
+        df[column_name] = group_nums
+
+    # 保存到 Excel 文件
+    df.to_excel("group_nums_results.xlsx", index=False)
+
+
+
 
 # count_subgroup_size_distribution_fixed_range()
-# count_subgroup_size_distribution()
-count_subgroup_size_distribution_posibility()
+
+# count_subgroup_size_distribution_range()
+# count_subgroup_size_distribution_density()
+# count_subgroup_size_distribution_pairs()
+# count_subgroup_size_distribution_posibility()
+count_group_size_posibility_range()
+
+
 # count_neighbor_num()
 # count_neighbor_num_pairs()
 # count_neighbor_num_density()
@@ -1020,3 +1262,5 @@ count_subgroup_size_distribution_posibility()
 # groupnum_of_different_density()
 # groupnum_of_different_range()
 # groupnum_of_different_neighbors()
+
+fit_factors_group_with_loop()
