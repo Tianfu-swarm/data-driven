@@ -3,17 +3,16 @@ From: python:3.9-slim
 
 %post
     apt-get update && apt-get install -y python3 python3-pip
-    pip3 install networkx matplotlib numpy pandas tqdm scikit-learn
+    pip3 install networkx matplotlib numpy pandas tqdm scikit-learn tables mpi4py
 
     # 创建工作目录
-    mkdir -p /app/src
+    mkdir -p /docker/src
 
 
 %files
     # 将源代码文件复制到容器中
-    src/follow_neighbour.py /app/src/follow_neighbour.py
-    src/regression_analysis_log_distribution.py /app/src/regression_analysis_log_distribution.py
-
+    src/follow_neighbour.py /docker/src/follow_neighbour.py
+    src/regression_analysis_log_distribution.py /docker/src/regression_analysis_log_distribution.py
 
 %environment
     # 设置环境变量

@@ -1230,7 +1230,7 @@ def process_one_pair(args):
     return (range_r, area_s, n), cumulative_group_nums
 
 def fit_factors_group_with_loop():
-    total_pairs = 10000
+    total_pairs = 1000
     pairs = [
         (random.uniform(1, 15), random.uniform(1, 10), random.randint(10, 100))
         for _ in range(total_pairs)
