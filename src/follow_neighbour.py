@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from collections import Counter
 import pandas as pd
+import multiprocessing as mp
+from tqdm import tqdm
+
 
 def generate_bat_positions_point_processed_uniform(num_bats=100, x_range=(0, 10), y_range=(0, 10)):
     # 生成均匀分布的坐标
@@ -16,6 +19,7 @@ def generate_bat_positions_point_processed_uniform(num_bats=100, x_range=(0, 10)
 
     return bats
 
+
 def generate_bat_positions(rows=10, cols=10):
     bats = []
     for i in range(rows):
@@ -25,8 +29,8 @@ def generate_bat_positions(rows=10, cols=10):
 
     return bats
 
-def generate_follow_target(bats, range_r, follow_prob):
 
+def generate_follow_target(bats, range_r, follow_prob):
     bat_follow_target = {}
     bat_neighbors_count = {}
 
@@ -63,7 +67,6 @@ def generate_follow_target(bats, range_r, follow_prob):
 
 
 def calculate_subgroup_positions_size(bat_follow_target, bats):
-
     # 将蝙蝠编号和坐标映射到字典
     position_map = {bat_id: pos for bat_id, pos in bats}
 
@@ -101,6 +104,7 @@ def calculate_subgroup_positions_size(bat_follow_target, bats):
         group_size_position[group_id] = (group_size, (avg_x, avg_y))
 
     return group_size_position
+
 
 def plot_bat_follow_graph(bats, bat_follow_target):
     # 创建有向图
@@ -164,7 +168,8 @@ def plot_group_position(group_size_position):
     # 显示图形
     plt.show()
 
-def plot_heatmap_position(cumulative_x, cumulative_y,range_r):
+
+def plot_heatmap_position(cumulative_x, cumulative_y, range_r):
     # 网格分辨率设置
     grid_size = 10  # 网格大小
     x_max, y_max = 10, 10  # 坐标的最大值
@@ -207,7 +212,8 @@ def plot_heatmap_position(cumulative_x, cumulative_y,range_r):
     # 显示图形
     plt.show()
 
-def plot_heatmap_size_position(cumulative_group,range_r):
+
+def plot_heatmap_size_position(cumulative_group, range_r):
     # 网格分辨率设置
     grid_size = 10  # 10x10 网格
     x_max, y_max = 10, 10  # 坐标的最大范围
@@ -249,7 +255,8 @@ def plot_heatmap_size_position(cumulative_group,range_r):
 
     plt.show()
 
-def plot_group_nums(cumulative_group_nums,range_r):
+
+def plot_group_nums(cumulative_group_nums, range_r):
     # 统计每个 size 出现的次数
     size_counts = Counter(cumulative_group_nums)
     print(size_counts)
@@ -277,6 +284,7 @@ def plot_group_nums(cumulative_group_nums,range_r):
     plt.grid(True)
     plt.show()
 
+
 def plot_heatmap():
     # 初始化累积坐标
     cumulative_x = []
@@ -290,7 +298,7 @@ def plot_heatmap():
     for frame in range(1):
         # bats = generate_bat_positions(10,10)
         bats = generate_bat_positions_point_processed_uniform(100, (0, 10), (0, 10))
-        bat_follow_target, _ = generate_follow_target(bats,range_r)
+        bat_follow_target, _ = generate_follow_target(bats, range_r)
         group_size_position = calculate_subgroup_positions_size(bat_follow_target, bats)
         plot_bat_follow_graph(bats, bat_follow_target)
         plot_group_position(group_size_position)
@@ -315,17 +323,15 @@ def plot_heatmap():
         num_groups = len(group_size_position)
         cumulative_group_nums.append(num_groups)
 
-
-    plot_heatmap_position(cumulative_x, cumulative_y,range_r)
-    plot_heatmap_size_position(cumulative_group,range_r)
-    plot_group_nums(cumulative_group_nums,range_r)
+    plot_heatmap_position(cumulative_x, cumulative_y, range_r)
+    plot_heatmap_size_position(cumulative_group, range_r)
+    plot_group_nums(cumulative_group_nums, range_r)
 
 
 def groupnum_of_different_range():
-
     # 创建一个字典来存储每个range_r的group数量
     all_group_nums = {}
-    range_values = [2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+    range_values = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
 
     # 遍历range_r从1到10
     for range_r in range_values:
@@ -372,17 +378,17 @@ def groupnum_of_different_range():
     plt.legend()
 
     # 设置横轴刻度，每隔 1 显示一个标签
-    plt.xticks(np.arange(0, max(x_sorted)+1, 1))
+    plt.xticks(np.arange(0, max(x_sorted) + 1, 1))
     # 显示网格
     plt.grid(True)
     plt.show()
 
-def groupnum_of_different_density():
 
+def groupnum_of_different_density():
     # 创建一个字典来存储每个range_r的group数量
     all_group_nums = {}
     range_r = 3
-    area_r_all = [5,6,7,8,9,10]
+    area_r_all = [5, 6, 7, 8, 9, 10]
     # 遍历range_r从1到10
     for area_r in area_r_all:
         cumulative_group_nums = []
@@ -433,16 +439,21 @@ def groupnum_of_different_density():
     plt.grid(True)
     plt.show()
 
+
 def groupnum_of_different_neighbors():
     posibility = 1
+
     # 你想要测试的一对参数 (range_r, area_size)
     pairs = [
-        (2,10),
-        (3,10),
-        (4,10),
-        (5,10),
-        (6,10)
-        ]
+        (2, 10),
+        (2, 8),
+        (3, 9),
+        (5, 10),
+        (4, 6),
+        (6,8),
+        (8,10),
+        (10,10)
+    ]
 
     # 创建一个字典来存储每个 (range_r, area_s) 的 group 数量分布
     all_group_nums = {}
@@ -452,10 +463,10 @@ def groupnum_of_different_neighbors():
         cumulative_group_nums = []
 
         # 模拟 100000 个周期
-        for frame in range(100000):
+        for frame in range(10000):
             # 注意根据你真实的 area_s 设置 x,y 范围，例如 (0, area_s)
             bats = generate_bat_positions_point_processed_uniform(
-                100,  # 目标数
+                50,  # 目标数
                 (0, area_s),  # x 范围
                 (0, area_s)  # y 范围
             )
@@ -484,14 +495,14 @@ def groupnum_of_different_neighbors():
         x_sorted = [x[i] for i in sorted_indices]
         y_sorted = [y[i] for i in sorted_indices]
 
-        neighbor_count = range_r/area_s
+        neighbor_count = range_r / area_s
         # 绘制曲线，添加有区分度的 label
         plt.plot(x_sorted, y_sorted,
                  label=f"neighbor count = {neighbor_count:.2f}, range:{range_r}, area:{area_s}×{area_s}",
                  marker='o', linestyle='-')
 
     # 设置标题和标签
-    plt.title(f"Number of Subgroups for Different neighbors,P = {posibility}")
+    plt.title(f"Number of Subgroups for Different neighbors,P = {posibility}, num = 50")
     plt.xlabel("Number of Groups")
     plt.ylabel("Frequency")
 
@@ -505,6 +516,7 @@ def groupnum_of_different_neighbors():
     # 显示网格
     plt.grid(True)
     plt.show()
+
 
 def count_neighbor_num():
     range_neighbors_distribution = {}
@@ -557,6 +569,7 @@ def count_neighbor_num():
 
     # 显示图形
     plt.show()
+
 
 def count_neighbor_num_density():
     """
@@ -779,12 +792,13 @@ def count_neighbor_num_pairs():
     # 最后显示图形
     plt.show()
 
+
 def count_neighbor_num_bats():
     # 固定的搜索半径
     fixed_range_r = 5
 
     # 不同的蝙蝠数量
-    area_size = [7,6]
+    area_size = [7, 6]
 
     # 用于存储不同蝙蝠数量（num_bats）对应的邻居数量频率分布
     neighbors_distribution_dict = {}
@@ -853,6 +867,7 @@ def count_neighbor_num_bats():
     # 显示图形
     plt.show()
 
+
 def count_subgroup_size_distribution_range():
     range_values = np.arange(3, 4, 1)  # 半径范围 1 到 10
     posibility = 1
@@ -898,9 +913,10 @@ def count_subgroup_size_distribution_range():
     # 显示图形
     plt.show()
 
+
 def count_subgroup_size_distribution_density():
     # area_size = np.arange(1, 11, 1)  # 半径范围 1 到 10
-    area_size = {1,5,10}
+    area_size = {1, 5, 10}
     posibility = 1
     range_r = 1
     subgroup_size_dict = {}  # 存储不同半径的子群大小
@@ -939,6 +955,7 @@ def count_subgroup_size_distribution_density():
     plt.legend(loc='best')
     plt.show()
 
+
 def count_subgroup_size_distribution_pairs():
     pairs = [
         (2, 4),
@@ -950,7 +967,7 @@ def count_subgroup_size_distribution_pairs():
     posibility = 1
     subgroup_size_dict = {}  # 存储不同半径的子群大小
 
-    for [range_r,area_s] in pairs:
+    for [range_r, area_s] in pairs:
         all_subgroup_sizes = []  # 单独存储当前半径的子群大小
 
         for frame in range(10000):  # 每个半径计算10次
@@ -983,6 +1000,7 @@ def count_subgroup_size_distribution_pairs():
     plt.grid(True)
     plt.legend(loc='best')
     plt.show()
+
 
 def count_subgroup_size_distribution_posibility():
     posibility = np.arange(0.95, 1.0, 0.01)  # 半径范围 1 到 10
@@ -1028,6 +1046,7 @@ def count_subgroup_size_distribution_posibility():
 
     # 显示图形
     plt.show()
+
 
 def count_subgroup_size_distribution_fixed_range():
     # 固定的半径值（可根据需要修改）
@@ -1092,8 +1111,9 @@ def count_subgroup_size_distribution_fixed_range():
 
     plt.show()
 
+
 def count_group_size_posibility_range():
-    range_r = np.arange(5,10,1)  # 固定不同区域大小
+    range_r = np.arange(5, 10, 1)  # 固定不同区域大小
     probabilities = np.arange(0.6, 1.099, 0.1)  # p 从 0 到 1，每隔 0.1 取一个值
 
     mode_values = []
@@ -1171,7 +1191,7 @@ def count_group_size_posibility_range():
     ax2.set_zlim(0, np.max(var_values[:, 2]))
     ax2.view_init(elev=30, azim=135)
 
-    #mode
+    # mode
     ax3 = fig.add_subplot(133, projection='3d')
 
     for x, y, z in mode_values:
@@ -1186,62 +1206,54 @@ def count_group_size_posibility_range():
     ax3.set_zlim(0, np.max(mode_values[:, 2]))
     ax3.view_init(elev=30, azim=135)
 
-
     plt.tight_layout()
     plt.show()
 
-def fit_factors_group_with_loop():
-    posibility = 1  # 跟随概率
 
-    # 随机生成参数对 (range_r, area_size, n)
-    # 例如：随机生成 5 组参数
-    pairs = [
-        (random.randint(1, 15), random.randint(1, 10), random.randint(10, 100))
-        for _ in range(10000)
-    ]
+def process_one_pair(args):
+    range_r, area_s, n = args
+    cumulative_group_nums = []
+    for frame in range(10000):
 
-    # 创建一个字典来存储每个 (range_r, area_s, n) 的 group 数量分布
-    all_group_nums = {}
-
-    # 遍历每个参数对
-    for (range_r, area_s, n) in pairs:
-        cumulative_group_nums = []
-
-        # 模拟 100000 个周期
-
-            # 根据 area_s 设置 x, y 范围
         bats = generate_bat_positions_point_processed_uniform(
-                n,  # 随机生成的目标数
-                (0, area_s),  # x 范围
-                (0, area_s)  # y 范围
-            )
-        bat_follow_target, _ = generate_follow_target(bats, range_r, posibility)
+            n,  # 目标数
+            (0, area_s),  # x 范围
+            (0, area_s)  # y 范围
+        )
+        bat_follow_target, _ = generate_follow_target(bats, range_r, 1)
         group_size_position = calculate_subgroup_positions_size(bat_follow_target, bats)
 
-            # 统计每一帧的 group 数量
+        # 统计每一帧的 group 数量
         num_groups = len(group_size_position)
         cumulative_group_nums.append(num_groups)
 
-        # 将该 (range_r, area_s, n) 对应的 group 数量分布保存到字典
-        all_group_nums[(range_r, area_s, n)] = cumulative_group_nums
+    return (range_r, area_s, n), cumulative_group_nums
 
-    # 将结果保存到 Excel 文件
-    save_to_excel(all_group_nums)
+def fit_factors_group_with_loop():
+    total_pairs = 10000
+    pairs = [
+        (random.uniform(1, 15), random.uniform(1, 10), random.randint(10, 100))
+        for _ in range(total_pairs)
+    ]
 
-def save_to_excel(all_group_nums):
-    # 创建一个 DataFrame 来存储结果
-    df = pd.DataFrame()
+    results = []
+    with mp.Pool(processes=mp.cpu_count()) as pool:
+        for res in tqdm(pool.imap_unordered(process_one_pair, pairs), total=len(pairs)):
+            results.append(res)
 
-    # 将字典中的数据转换为 DataFrame
+    all_group_nums = dict(results)
+    print("Processing complete!")
+    save_to_hdf5(all_group_nums)
+
+def save_to_hdf5(all_group_nums):
+    rows = []
     for (range_r, area_s, n), group_nums in all_group_nums.items():
-        # 列名为 (r, A, n)
-        column_name = f"r={range_r}, A={area_s}, n={n}"
-        df[column_name] = group_nums
+        for num in group_nums:
+            rows.append((range_r, area_s, n, num))
 
-    # 保存到 Excel 文件
-    df.to_excel("group_nums_results.xlsx", index=False)
+    df = pd.DataFrame(rows, columns=["follow_range", "Area_range", "num_of_robots", "num_of_subgroups"])
 
-
+    df.to_hdf("group_nums_results.h5", key="df", mode="w", complevel=5, complib="blosc")
 
 
 # count_subgroup_size_distribution_fixed_range()
@@ -1250,7 +1262,7 @@ def save_to_excel(all_group_nums):
 # count_subgroup_size_distribution_density()
 # count_subgroup_size_distribution_pairs()
 # count_subgroup_size_distribution_posibility()
-count_group_size_posibility_range()
+# count_group_size_posibility_range()
 
 
 # count_neighbor_num()
@@ -1263,4 +1275,6 @@ count_group_size_posibility_range()
 # groupnum_of_different_range()
 # groupnum_of_different_neighbors()
 
-fit_factors_group_with_loop()
+if __name__ == "__main__":
+    mp.freeze_support()  # Only needed for Windows, but safe on macOS
+    fit_factors_group_with_loop()
