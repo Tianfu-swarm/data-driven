@@ -1,6 +1,7 @@
 import random
 import math
 import networkx as nx
+import scipy.stats as stats
 import matplotlib.pyplot as plt
 import numpy as np
 from collections import Counter
@@ -442,17 +443,19 @@ def groupnum_of_different_density():
 
 def groupnum_of_different_neighbors():
     posibility = 1
-
+    num = 100
     # 你想要测试的一对参数 (range_r, area_size)
     pairs = [
         (2, 10),
         (2, 8),
         (3, 9),
-        (5, 10),
-        (4, 6),
-        (6,8),
-        (8,10),
-        (10,10)
+        # (5, 10),
+        # (4, 6),
+        # (6,8),
+        # (8,10),
+        # (10,10),
+        # (12,10),
+        # (15,10)
     ]
 
     # 创建一个字典来存储每个 (range_r, area_s) 的 group 数量分布
@@ -466,7 +469,7 @@ def groupnum_of_different_neighbors():
         for frame in range(10000):
             # 注意根据你真实的 area_s 设置 x,y 范围，例如 (0, area_s)
             bats = generate_bat_positions_point_processed_uniform(
-                50,  # 目标数
+                num,  # 目标数
                 (0, area_s),  # x 范围
                 (0, area_s)  # y 范围
             )
@@ -501,8 +504,22 @@ def groupnum_of_different_neighbors():
                  label=f"neighbor count = {neighbor_count:.2f}, range:{range_r}, area:{area_s}×{area_s}",
                  marker='o', linestyle='-')
 
+        # 计算 μ 和 σ
+        # mu = -0.2252 + 0.0828 * np.log(1 / range_r) + (-0.0442) * np.log(1 / (area_s ** 2)) + 0.1979 * np.log(num)
+        # sigma = 0.2456 + 0.0131 * np.log(1 / range_r) + (-0.0068) * np.log(1 / (area_s ** 2)) + 0.0529 * np.log(num)
+
+        mu = 0.3448 + 0.3701  * np.log(1 / range_r)  -0.0872 * np.log(1 / (area_s ** 2)) + 0.1831 * np.log(num)
+
+        sigma = 0.1741 -0.0322 * np.log(1 / range_r) + 0.0067 * np.log(1 / (area_s ** 2)) + 0.0563 * np.log(num)
+
+
+        x_log_norm = np.linspace(min(x_sorted), max(x_sorted), 10000)
+        pdf_log_norm = stats.lognorm.pdf(x_log_norm, s=sigma, scale=np.exp(mu)) * sum(y_sorted)  # 归一化频率
+        # 绘制对数正态分布曲线
+        plt.plot(x_log_norm, pdf_log_norm, linestyle='dashed', label=f"LogNorm Fit (μ={mu:.2f}, σ={sigma:.2f})")
+
     # 设置标题和标签
-    plt.title(f"Number of Subgroups for Different neighbors,P = {posibility}, num = 50")
+    plt.title(f"Number of Subgroups for Different neighbors,P = {posibility}, num = {num}")
     plt.xlabel("Number of Groups")
     plt.ylabel("Frequency")
 
@@ -1213,7 +1230,7 @@ def count_group_size_posibility_range():
 def process_one_pair(args):
     range_r, area_s, n = args
     cumulative_group_nums = []
-    for frame in range(10000):
+    for frame in range(1000):
 
         bats = generate_bat_positions_point_processed_uniform(
             n,  # 目标数
@@ -1230,11 +1247,13 @@ def process_one_pair(args):
     return (range_r, area_s, n), cumulative_group_nums
 
 def fit_factors_group_with_loop():
-    total_pairs = 1000
     pairs = [
-        (random.uniform(1, 15), random.uniform(1, 10), random.randint(10, 100))
-        for _ in range(total_pairs)
+        (x, y, random.randint(10, 100))
+        for x in np.arange(1, 10, 0.1)
+        for y in np.arange(1, 2 * x, 0.1)
     ]
+
+    print(len(pairs))
 
     results = []
     with mp.Pool(processes=mp.cpu_count()) as pool:
@@ -1253,7 +1272,7 @@ def save_to_hdf5(all_group_nums):
 
     df = pd.DataFrame(rows, columns=["follow_range", "Area_range", "num_of_robots", "num_of_subgroups"])
 
-    df.to_hdf("group_nums_results.h5", key="df", mode="w", complevel=5, complib="blosc")
+    df.to_hdf("group_nums_results_3.h5", key="df", mode="w", complevel=5, complib="blosc")
 
 
 # count_subgroup_size_distribution_fixed_range()
@@ -1273,8 +1292,8 @@ def save_to_hdf5(all_group_nums):
 
 # groupnum_of_different_density()
 # groupnum_of_different_range()
-# groupnum_of_different_neighbors()
+groupnum_of_different_neighbors()
 
-if __name__ == "__main__":
-    mp.freeze_support()  # Only needed for Windows, but safe on macOS
-    fit_factors_group_with_loop()
+# if __name__ == "__main__":
+#     mp.freeze_support()  # Only needed for Windows, but safe on macOS
+#     fit_factors_group_with_loop()

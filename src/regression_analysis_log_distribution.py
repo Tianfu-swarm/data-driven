@@ -4,7 +4,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 
 # 读取数据
-file_path = 'group_nums_results.h5'
+file_path = '../data/group_nums_results_3.h5'
 df = pd.read_hdf(file_path,key="df")
 print(df)
 
@@ -13,7 +13,7 @@ df['log_1_r'] = np.log(1 / df['follow_range'].clip(lower=1e-10))
 df['log_1_A'] = np.log(1 / (df['Area_range'].clip(lower=1e-10) ** 2))
 df['log_n'] = np.log(df['num_of_robots'].clip(lower=1e-10))
 df['log_numsofsubgroup'] = np.log(df['num_of_subgroups'].clip(lower=1e-10))
-print(df)
+
 
 # 分组计算均值 (mu) 和标准差 (sigma)
 grouped = df.groupby(['follow_range', 'Area_range', 'num_of_robots'])['log_numsofsubgroup'].agg(['mean', 'std']).reset_index()
